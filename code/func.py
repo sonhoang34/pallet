@@ -2,6 +2,49 @@ import numpy as np
 import cv2
 
 
+def median_point(points):
+    """
+    points: ndarray shape (N, 3)
+    return: ndarray shape (3,)
+    """
+    points = np.asarray(points)
+    assert points.ndim == 2 and points.shape[1] == 3
+    return np.median(points, axis=0)
+
+def find_distance(x, y, fx, fy, cx, cy, depth_raw):
+    center = [x, y, depth_raw[y, x]]
+    point1 = [x, y - 5, depth_raw[y-5, x]]
+    point2 = [x + 5, y, depth_raw[y, x+5]]
+    point3 = [x, y + 5, depth_raw[y+5, x]]
+    point4 = [x - 5, y, depth_raw[x-5, y]]
+    
+    points = [center, point1, point2, point3, point4]
+    
+    points_3d = convert_2d_to_3d_coordinates(points, fx, fy, cx, cy)
+    
+    points_3d = median_point(points_3d)
+    
+    return [list(points_3d)]
+    
+
+def find_distance_ad(x, y, fx, fy, cx, cy, depth_raw):
+    # Tạo offsets cho 5 điểm (center + 4 hướng)
+    offsets = np.array([[0, 0], [0, -5], [5, 0], [0, 5], [-5, 0]])
+
+    # Tính tọa độ 2D của các điểm
+    coords = np.array([x, y]) + offsets
+
+    # Lấy depth values (sửa bug: đúng thứ tự y, x)
+    depths = depth_raw[coords[:, 1], coords[:, 0]]
+
+    # Tạo points 2D+depth
+    points = np.column_stack([coords, depths])
+
+    # Convert sang 3D và tính median
+    points_3d = convert_2d_to_3d_coordinates(points, fx, fy, cx, cy)
+
+    return np.median(points_3d, axis=0)
+
 def find_all_2d_points_in_bounding_box(box, depth_align, stride=5):
     x1, y1, x2, y2 = map(round, box)
     # depth_raw = np.asarray(o3d.io.read_image(depth_path))
@@ -60,7 +103,7 @@ def visual(img, fx, fy, cx, cy, bbox=None, theta=None, points_2d=None, pos_3d=No
     
 
     if theta is not None and pos_3d is not None:
-        if pos_3d.size == 0 or np.any(np.isnan(pos_3d)):
+        if len(pos_3d) == 0 or np.any(np.isnan(pos_3d)):
             pass
         else:
             rvec = np.array([[0.0], [theta], [0.0]], dtype=np.float64)
@@ -68,9 +111,9 @@ def visual(img, fx, fy, cx, cy, bbox=None, theta=None, points_2d=None, pos_3d=No
 
             axis_points_3d = np.float32([
                 [0, 0, 0],
-                [200, 0, 0],
-                [0, 200, 0],
-                [0, 0, 200]
+                [100, 0, 0],
+                [0, 100, 0],
+                [0, 0, 100]
             ])
 
             camera_matrix = np.array([

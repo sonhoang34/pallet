@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sơ đồ hoạt động hệ thống phát hiện Pallet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 40px;
+            font-size: 28px;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .box {
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            min-width: 300px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .process {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .decision {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            padding: 30px;
+            min-width: 280px;
+        }
+
+        .data {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .compute {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .end {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #cbd5e0;
+            margin: 5px 0;
+        }
+
+        .arrow-text {
+            font-size: 13px;
+            color: #4a5568;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+
+        .parallel {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .group {
+            border: 3px dashed #e2e8f0;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            background: #f7fafc;
+        }
+
+        .group-title {
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .note {
+            background: #fff5e1;
+            border-left: 5px solid #ffa726;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #5d4037;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎯 Sơ đồ hoạt động hệ thống phát hiện Pallet</h1>
+
+        <div class="flowchart">
+            <!-- Khởi động -->
+            <div class="box start">🚀 Khởi động chương trình</div>
+            <div class="arrow"></div>
+
+            <!-- Load Models -->
+            <div class="group">
+                <div class="group-title">📦 LOAD MODELS</div>
+                <div class="parallel">
+                    <div class="box process">Load YOLO Model<br />(phát hiện pallet)</div>
+                    <div class="box process">Load MobileNetV3 Model<br />(phát hiện tâm pallet)</div>
+                </div>
+            </div>
+            <div class="arrow"></div>
+
+            <div class="box data">Khởi tạo Tracker</div>
+            <div class="arrow"></div>
+
+            <div class="box data">Khởi tạo Camera RealSense<br />(fx, fy, cx, cy)</div>
+            <div class="arrow"></div>
+
+            <!-- Vòng lặp chính -->
+            <div class="box start">🔄 VÒNG LẶP CHÍNH</div>
+            <div class="arrow"></div>
+
+            <!-- Lấy frame -->
+            <div class="group">
+                <div class="group-title">📷 LẤY FRAME TỪ CAMERA</div>
+                <div class="parallel">
+                    <div class="box data">RGB Image</div>
+                    <div class="box data">Depth Raw Data</div>
+                </div>
+            </div>
+            <div class="arrow"></div>
+
+            <!-- YOLO Detection -->
+            <div class="box process">🔍 YOLO Detection + Tracking<br />(tracking_phase)</div>
+            <div class="arrow"></div>
+
+            <div class="box decision">Có phát hiện<br />pallet?</div>
+            <div class="arrow-text">❌ Không → Quay lại vòng lặp</div>
+            <div class="arrow-text">✅ Có ↓</div>
+
+            <div class="box compute">Lấy bounding box từ tracking_objects[0][0]</div>
+            <div class="arrow"></div>
+
+            <!-- MobileNetV3 Detection -->
+            <div class="box process">🎯 MobileNetV3 Detection<br />(predict_multi_pallet_onnx)</div>
+            <div class="arrow"></div>
+
+            <!-- Lọc điểm tâm -->
+            <div class="group">
+                <div class="group-title">🔎 LỌC CÁC ĐIỂM TÂM</div>
+                <div class="box decision">confidence > 0.3?</div>
+                <div class="arrow"></div>
+                <div class="box decision">Điểm nằm trong bbox?<br />(is_in_bbox)</div>
+                <div class="arrow"></div>
+                <div class="box decision">Depth > 0?</div>
+                <div class="arrow-text">✅ Có ↓</div>
+            </div>
+
+            <div class="box compute">📍 Xác định tọa độ tâm (x, y)</div>
+            <div class="arrow"></div>
+
+            <!-- Chuyển đổi 3D -->
+            <div class="group">
+                <div class="group-title">🌐 CHUYỂN ĐỔI 2D → 3D</div>
+                <div class="box compute">Tính tọa độ 3D điểm tâm<br />(convert_2d_to_3d_coordinates)</div>
+                <div class="arrow"></div>
+                <div class="box compute">Tìm tất cả điểm trong bbox<br />(stride=2)</div>
+                <div class="arrow"></div>
+                <div class="box compute">Chuyển đổi tất cả điểm sang 3D</div>
+            </div>
+            <div class="arrow"></div>
+
+            <div class="box decision">Số điểm > 250?</div>
+            <div class="arrow-text">❌ Không → Hiển thị kết quả</div>
+            <div class="arrow-text">✅ Có ↓</div>
+
+            <!-- Point Cloud -->
+            <div class="group">
+                <div class="group-title">☁️ XỬ LÝ POINT CLOUD</div>
+                <div class="box process">Tạo Point Cloud (pcd_pallet)</div>
+                <div class="arrow"></div>
+                <div class="box compute">Lọc theo khoảng cách<br />(depth ± 200mm)</div>
+                <div class="arrow"></div>
+                <div class="box decision">Số điểm > 100?</div>
+                <div class="arrow-text">✅ Có ↓</div>
+            </div>
+
+            <!-- RANSAC -->
+            <div class="box process">🔧 RANSAC: Trích xuất mặt phẳng trước<br />(extract_pallett_front_points)</div>
+            <div class="arrow"></div>
+
+            <div class="box decision">Số điểm mặt phẳng > 50?</div>
+            <div class="arrow-text">✅ Có ↓</div>
+
+            <div class="box compute">Tính vector pháp tuyến (n)</div>
+            <div class="arrow"></div>
+
+            <div class="box decision">abs(n_y)
+                < 0.5?<br />(kiểm tra độ nghiêng)
+            </div>
+            <div class="arrow-text">✅ Có ↓</div>
+
+            <div class="box compute">📐 Tính góc theta<br />(góc nghiêng pallet)<br />theta = atan2(n_x, n_z)</div>
+            <div class="arrow"></div>
+
+            <!-- Visualize -->
+            <div class="box process">🎨 Visualize kết quả<br />(vẽ tâm, góc, tọa độ 3D lên frame)</div>
+            <div class="arrow"></div>
+
+            <div class="box data">📺 Hiển thị frame</div>
+            <div class="arrow"></div>
+
+            <div class="box decision">Nhấn 'q'<br />hoặc ESC?</div>
+            <div class="arrow-text">❌ Không → Quay lại vòng lặp</div>
+            <div class="arrow-text">✅ Có ↓</div>
+
+            <div class="box compute">📊 Tính FPS trung bình</div>
+            <div class="arrow"></div>
+
+            <div class="box end">🏁 Kết thúc chương trình</div>
+        </div>
+
+        <div class="note">
+            <strong>💡 Lưu ý:</strong> Hệ thống kết hợp 2 mô hình AI (YOLO + MobileNetV3) với xử lý Point Cloud (RANSAC)
+            để xác định chính xác vị trí và hướng của pallet trong không gian 3D. Thời gian xử lý trung bình được tính
+            để đánh giá hiệu năng (FPS).
+        </div>
+    </div>
+</body>
+
+</html>
